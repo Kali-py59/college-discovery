@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model College {
+  id          String   @id @default(cuid())
+  name        String
+  location    String
+  city        String
+  state       String
+  fees        Int
+  rating      Float    @default(0)
+  courses     String[]
+  overview    String   @db.Text
+  placements  Json?
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  reviews         Review[]
+  savedBy         SavedCollege[]
+  comparisonItems ComparisonCollege[]
+
+  @@index([city])
+  @@index([rating])
+  @@index([fees])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int
+  comment    String   @db.Text
+  authorName String
+  createdAt  DateTime @default(now())
+
+  college    College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  collegeId  String
+
+  @@index([collegeId])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  savedColleges SavedCollege[]
+  comparisons   Comparison[]
+}
+
+model SavedCollege {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  college   College  @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  collegeId String
+  savedAt   DateTime @default(now())
+
+  @@unique([userId, collegeId])
+}
+
+model Comparison {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  name      String?
+  createdAt DateTime @default(now())
+
+  colleges  ComparisonCollege[]
+}
+
+model ComparisonCollege {
+  id           String     @id @default(cuid())
+  comparison   Comparison @relation(fields: [comparisonId], references: [id], onDelete: Cascade)
+  comparisonId String
+  college      College    @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  collegeId    String
+
+  @@unique([comparisonId, collegeId])
+}
