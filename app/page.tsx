@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import CompareBar from './CompareBar'
+import SaveButton from './SaveButton'
 
 export default async function Home() {
   const colleges = await prisma.college.findMany({
@@ -11,12 +12,13 @@ export default async function Home() {
     <main className="max-w-5xl mx-auto p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">College Discovery</h1>
-        <Link
-          href="/compare"
-          className="text-sm bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          View Comparison →
-        </Link>
+        <div className="flex gap-3">
+          <Link href="/saved" className="text-sm border px-4 py-2 rounded">Saved</Link>
+          <Link href="/compare" className="text-sm bg-blue-600 text-white px-4 py-2 rounded">
+            View Comparison →
+          </Link>
+          <Link href="/login" className="text-sm border px-4 py-2 rounded">Login</Link>
+        </div>
       </div>
 
       <div className="grid gap-4">
@@ -30,7 +32,10 @@ export default async function Home() {
                 <span>₹{college.fees.toLocaleString()}/year</span>
               </div>
             </Link>
-            <CompareBar collegeId={college.id} />
+            <div className="flex mt-2">
+              <CompareBar collegeId={college.id} />
+              <SaveButton collegeId={college.id} />
+            </div>
           </div>
         ))}
       </div>
